@@ -1,0 +1,48 @@
+// ==UserScript==
+// @name        bitcointousd-silkroad
+// @namespace   bitcoin
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js
+// @include     http://silkroadvb5piz3r.onion/*
+// @version     1
+// ==/UserScript==
+
+function get_timestamp() {
+    return parseInt(new Date().getTime() / 1000);
+}
+
+function inject_usd(rate) {
+    // go through the document and append all instances of bitcoin with USD
+    var rate = parseFloat(rate);
+    var elements = $('.price_small, .price_big');
+    elements.each(function(index, element) {;
+        var value = parseFloat($(element).text().substr(1));
+        var new_value = (value * rate).toFixed(2);
+        usd = $("<span>").addClass('inUSD').text("$" + new_value);
+        $(element).append(usd)
+    });
+
+    msg = $("<span>").text('Using ' + rate + " USD/BTC");
+    $("#footer").prepend(msg);
+}
+
+var rate = GM_getValue('btc_usd');
+var time = GM_getValue("btc_usd_time");
+var expired = time + (60 * 60 * 24) < get_timestamp();
+
+if(!rate || expired) {
+    GM_xmlhttpRequest({
+      method: "GET",
+      url: 'https://mtgox.com/api/1/BTCUSD/ticker',
+      onload: function(response) {
+        var j = JSON.parse(response.responseText);
+        rate = j['return']['buy']['value'];
+        GM_setValue("btc_usd", rate)
+        GM_setValue("btc_usd_time", get_timestamp())
+        inject_usd(rate);
+      }
+    });
+} else {
+    inject_usd(rate);
+}
+
+GM_addStyle(".inUSD {color: green; clear: left;display: block;}");
