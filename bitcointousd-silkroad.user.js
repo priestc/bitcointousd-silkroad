@@ -10,13 +10,20 @@ function get_timestamp() {
     return parseInt(new Date().getTime() / 1000);
 }
 
+function numberWithCommas(x) {
+    // 12345 -> 12,345
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
+
 function inject_usd(rate) {
     // go through the document and append all instances of bitcoin with USD
     var rate = parseFloat(rate);
     var elements = $('.price_small, .price_big');
-    elements.each(function(index, element) {;
-        var value = parseFloat($(element).text().substr(1));
-        var new_value = (value * rate).toFixed(2);
+    elements.each(function(index, element) {
+        var value = parseFloat($(element).text().substr(1).replace(",", ""));
+        var new_value = numberWithCommas((value * rate).toFixed(2));
         usd = $("<span>").addClass('inUSD').text("$" + new_value);
         $(element).append(usd)
     });
