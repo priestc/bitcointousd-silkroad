@@ -34,7 +34,7 @@ function inject_usd(rate) {
 
 var rate = GM_getValue('btc_usd');
 var time = GM_getValue("btc_usd_time");
-var expired = time + (60 * 60 * 24) < get_timestamp();
+var expired = time + (60 * 60 * 3) < get_timestamp();
 
 if(!rate || expired) {
     GM_xmlhttpRequest({
